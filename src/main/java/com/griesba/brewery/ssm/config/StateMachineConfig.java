@@ -2,7 +2,9 @@ package com.griesba.brewery.ssm.config;
 
 import com.griesba.brewery.ssm.domain.PaymentEvent;
 import com.griesba.brewery.ssm.domain.PaymentState;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.EnableStateMachineFactory;
 import org.springframework.statemachine.config.StateMachineConfigurerAdapter;
 import org.springframework.statemachine.config.builders.StateMachineConfigurationConfigurer;
@@ -15,9 +17,12 @@ import org.springframework.stereotype.Service;
 import java.util.EnumSet;
 
 @EnableStateMachineFactory
+@RequiredArgsConstructor
 @Service
 @Slf4j
 public class StateMachineConfig extends StateMachineConfigurerAdapter<PaymentState, PaymentEvent> {
+
+    private final Action<PaymentState, PaymentEvent> preAuthAction;
 
     @Override
     public void configure(StateMachineStateConfigurer<PaymentState, PaymentEvent> states) throws Exception {
@@ -38,6 +43,7 @@ public class StateMachineConfig extends StateMachineConfigurerAdapter<PaymentSta
                 .source(PaymentState.NEW)
                 .target(PaymentState.NEW)
                 .event(PaymentEvent.PRE_AUTHORIZE)
+                .action(preAuthAction)
 
                 .and().withExternal()
                 .source(PaymentState.NEW)
@@ -48,6 +54,11 @@ public class StateMachineConfig extends StateMachineConfigurerAdapter<PaymentSta
                 .source(PaymentState.NEW)
                 .target(PaymentState.PRE_AUTH_ERROR)
                 .event(PaymentEvent.PRE_AUTHORIZE_DECLINED)
+
+                .and().withExternal()
+                .source(PaymentState.PRE_AUTH)
+                .target(PaymentState.AUTH)
+                .event(PaymentEvent.AUTHORIZE)
                 ;
 
     }

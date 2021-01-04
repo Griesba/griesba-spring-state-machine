@@ -32,6 +32,7 @@ class PaymentServiceImplTest {
     void preAuth() {
         Payment savedPayment = paymentService.newPayment(payment);
 
+        System.out.println(savedPayment.getState().toString());
         assertEquals("NEW", savedPayment.getState().toString());
 
         StateMachine sm = paymentService.preAuth(savedPayment.getId());
