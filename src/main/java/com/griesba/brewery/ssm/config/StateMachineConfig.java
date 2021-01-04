@@ -23,6 +23,7 @@ import java.util.EnumSet;
 public class StateMachineConfig extends StateMachineConfigurerAdapter<PaymentState, PaymentEvent> {
 
     private final Action<PaymentState, PaymentEvent> preAuthAction;
+    private final Action<PaymentState, PaymentEvent> authApprovedAction;
 
     @Override
     public void configure(StateMachineStateConfigurer<PaymentState, PaymentEvent> states) throws Exception {
@@ -58,7 +59,8 @@ public class StateMachineConfig extends StateMachineConfigurerAdapter<PaymentSta
                 .and().withExternal()
                 .source(PaymentState.PRE_AUTH)
                 .target(PaymentState.AUTH)
-                .event(PaymentEvent.AUTHORIZE)
+                .event(PaymentEvent.AUTHORIZE_APPROVED)
+                .action(authApprovedAction)
                 ;
 
     }

@@ -1,8 +1,10 @@
 package com.griesba.brewery.ssm.service;
 
 import com.griesba.brewery.ssm.domain.Payment;
+import com.griesba.brewery.ssm.domain.PaymentState;
 import com.griesba.brewery.ssm.repositories.PaymentRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -46,5 +48,30 @@ class PaymentServiceImplTest {
         //assertEquals("PRE_AUTH", preAuthPayment.getState().toString());
 
         System.out.println(preAuthPayment);
+    }
+
+
+    @Transactional
+    @RepeatedTest(10)
+    void authorizePayment() {
+        Payment savedPayment = paymentService.newPayment(payment);
+
+        System.out.println(savedPayment.getState().toString());
+        assertEquals("NEW", savedPayment.getState().toString());
+
+        StateMachine sm = paymentService.preAuth(savedPayment.getId());
+
+        if (sm.getState().getId() == PaymentState.PRE_AUTH) {
+            sm = paymentService.authorizePayment(savedPayment.getId());
+
+            System.out.println(sm.getState().getId().toString());
+
+
+            Payment authPayment = paymentRepository.getOne(savedPayment.getId());
+
+            System.out.println(authPayment.getState().toString());
+        } else {
+            System.out.println(sm.getState().getId().toString());
+        }
     }
 }
